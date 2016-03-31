@@ -1,5 +1,5 @@
-#ifndef ___PUNGENT_UTILS_HPP___
-#define ___PUNGENT_UTILS_HPP___
+#ifndef ___PUNGENT_UTIL_HPP___
+#define ___PUNGENT_UTIL_HPP___
 
 #include <boost/optional.hpp>
 #include <regex>
@@ -12,13 +12,21 @@ namespace pungent
 namespace util
 {
 template <typename Iterator>
-boost::optional<Iterator>
-    search(Iterator start, Iterator end, const std::regex & r)
+boost::optional<Iterator> search(
+    Iterator start,
+    Iterator end,
+    const std::regex & r,
+    std::regex_constants::match_flag_type = std::regex_constants::match_default)
 {
   using maybe_it = boost::optional<Iterator>;
   std::smatch results;
-  return std::regex_search(start, end, results, r) ? maybe_it(results[0].second)
-                                                   : boost::none;
+  std::cout << std::string(start, end) << std::endl;
+  if (std::regex_search(start, end, results, r)) {
+    /* FIXME: match_continuous isn't working, so compare to start */
+    auto res = results[0];
+    return res.first == start ? maybe_it(results[0].second) : boost::none;
+  }
+  return boost::none;
 }
 
 /* http://www.cppsamples.com/common-tasks/apply-tuple-to-function.html */
@@ -72,4 +80,4 @@ decltype(auto) for_each_tuple(Tuple && t, F && fn)
 }
 }
 
-#endif /* ___PUNGENT_UTILS_HPP___ */
+#endif /* ___PUNGENT_UTIL_HPP___ */

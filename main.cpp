@@ -14,7 +14,7 @@ int main()
   Token open_paren("\\(");
   Token close_paren("\\)");
 
-  std::string s(")a");
+  std::string s(" )a");
   std::string a(*close_paren.try_parse(s.cbegin(), s.cend()), s.cend());
   std::cout << a << std::endl;
 
