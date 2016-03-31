@@ -36,10 +36,21 @@ decltype(auto) apply_from_tuple(Tuple && t, F && fn)
                           std::make_index_sequence<tSize>());
 }
 
+template <typename F, typename Tuple, size_t... S>
+decltype(auto)
+    transform_tuple_impl(F && fn, Tuple && t, std::index_sequence<S...>)
+{
+  return std::make_tuple(
+      std::forward<F>(fn)(std::get<S>(std::forward<Tuple>(t)))...);
+}
+
 template <typename F, typename Tuple>
 decltype(auto) transform_tuple(Tuple && t, F && fn)
 {
-  
+  std::size_t constexpr tSize =
+      std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
+  return transform_tuple_impl(std::forward<F>(fn), std::forward<Tuple>(t),
+                              std::make_index_sequence<tSize>());
 }
 }
 }

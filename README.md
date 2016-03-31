@@ -19,4 +19,10 @@ A parser generator, because the world really needs another one of these.
 - speed
 - language formalisms
 
+# TODO
+- add ebnf syntax
+    - can use c++'s `operator*`, `operator+`, etc and overload for `Token` and `Nonterminal` classes
+    - for all numerical quantifiers, return vector of `Out` instead of just out
+    - add `*`, `+`, `{,}`, `?` somehow
+
 [Jison](https://github.com/zaach/jison) actually does this extremely well, but I want to use C++ for my compiler so I'm kinda out of luck.

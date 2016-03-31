@@ -3,11 +3,6 @@
 #include <iostream>
 #include <string>
 
-int plus(int a, int b)
-{
-  return a + b;
-}
-
 int main()
 {
   using namespace pungent;
@@ -26,6 +21,11 @@ int main()
   util::apply_from_tuple(std::make_tuple(1, 2), [](auto a, auto b) {
     std::cout << a << "," << b << std::endl;
   });
+
+  auto res = util::transform_tuple(std::make_tuple(1, 2),
+                                   [](auto a) { return a + 1; });
+  util::apply_from_tuple(
+      res, [](auto a, auto b) { std::cout << a << ',' << b << std::endl; });
 
   std::cout << make_fun<int>([](auto a, auto b) { return a + b; }, 1, 2)
             << std::endl;
