@@ -27,54 +27,64 @@ struct Token {
 
 template <typename Out>
 struct Nonterminal {
-  /* template <typename Iterator> */
-  /*     std::function < Out() */
 };
 
-/* template <typename Out, typename... Args> */
-/* struct Rule : public Nonterminal<Out> { */
-/*   std::tuple<Args...> sentential; */
-/*   std::function<Out(Args...)> f; */
+template <typename... Args>
+void run_tup(std::tuple<Args...> t)
+{
+  util::for_each_tuple(t, [](auto el) { std::cout << el << std::endl; });
+}
 
-/*   template <typename Iterator> */
-/*   struct result_type { */
-/*     Iterator end; */
-/*     Out result; */
-/*   }; */
-/*   template <typename Iterator> */
-/*   using maybe = boost::optional<result_type<Iterator>>; */
+struct parse_error : public std::runtime_error {
+  parse_error(const std::string & s = "") : std::runtime_error(s)
+  {
+  }
+};
 
-/*   struct parse_error : public std::runtime_error { */
-/*     parse_error(const std::string & s = "") : std::runtime_error(s) */
-/*     { */
-/*     } */
-/*   }; */
+template <typename Func, typename... Args>
+struct Rule {
+  std::tuple<Args...> sentential;
+  Func f;
+  using out_type = typename std::result_of<Func>::type;
 
-/*   template <typename Iterator> */
-/*   maybe<Iterator> invoke(Iterator start, Iterator end) */
-/*   { */
-/*     try { */
-/*       auto results = hana::transform(sentential, [&](auto el) { */
-/*         auto res = el.try_parse(start, end); */
-/*         if (!res) { */
-/*           throw parse_error(); */
-/*         } */
-/*         auto st  = res->end; */
-/*         auto out = res->result; */
-/*         start    = st; */
-/*         return out; */
-/*       }); */
-/*     } catch (parse_error &) { */
-/*       return boost::none; */
-/*     } */
-/*     return return_type<Iterator>{start, util::apply_from_tuple()}; */
-/*   } */
+  Rule(std::tuple<Args...> tup, Func fun) : sentential(tup), f(fun)
+  {
+  }
 
-/*   template <typename... OtherArgs> */
-/*   Nonterminal<Out> operator|(const Rule<Out, OtherArgs...> & rhs) */
-/*   { */
-/*   } */
-/* }; */
+  template <typename _Func, typename... _Args>
+  static Rule<_Func, _Args...> make_rule(std::tuple<_Args...> tup, _Func fun)
+  {
+    return Rule<_Func, _Args...>(tup, fun);
+  }
+
+  template <typename Iterator>
+  struct return_type {
+    Iterator end;
+    out_type result;
+  };
+  template <typename Iterator>
+  using maybe = boost::optional<return_type<Iterator>>;
+
+  template <typename Iterator>
+  maybe<Iterator> invoke(Iterator start, Iterator end)
+  {
+    try {
+      auto results = util::transform_tuple(sentential, [&](auto el) {
+        auto res = el.try_parse(start, end);
+        if (!res) {
+          throw parse_error();
+        }
+        auto st  = res->end;
+        auto out = res->result;
+        start    = st;
+        return out;
+      });
+      return return_type<Iterator>{start, util::apply_from_tuple(results, f)};
+    } catch (parse_error &) {
+      return boost::none;
+    }
+  }
+};
 
 template <typename Out, typename Func, typename... Args>
 Out make_fun(Func f, Args... args)

@@ -1,6 +1,6 @@
+#include <iostream>
 #include "pungent.hpp"
 
-#include <iostream>
 #include <string>
 
 int main()
@@ -29,6 +29,8 @@ int main()
 
   std::cout << make_fun<int>([](auto a, auto b) { return a + b; }, 1, 2)
             << std::endl;
+
+  run_tup(std::make_tuple(34, 45));
 
   /* Nonterminal<int> E; */
   /* E = make_rule({num}, [](auto num) { return std::stoi(num); }) | */

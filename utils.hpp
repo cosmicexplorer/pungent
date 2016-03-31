@@ -30,7 +30,7 @@ decltype(auto) apply_tuple_impl(F && fn, Tuple && t, std::index_sequence<S...>)
 template <typename F, typename Tuple>
 decltype(auto) apply_from_tuple(Tuple && t, F && fn)
 {
-  std::size_t constexpr tSize =
+  constexpr size_t tSize =
       std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
   return apply_tuple_impl(std::forward<F>(fn), std::forward<Tuple>(t),
                           std::make_index_sequence<tSize>());
@@ -47,10 +47,27 @@ decltype(auto)
 template <typename F, typename Tuple>
 decltype(auto) transform_tuple(Tuple && t, F && fn)
 {
-  std::size_t constexpr tSize =
+  constexpr size_t tSize =
       std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
   return transform_tuple_impl(std::forward<F>(fn), std::forward<Tuple>(t),
                               std::make_index_sequence<tSize>());
+}
+
+template <typename F, typename Tuple, size_t... S>
+decltype(auto)
+    for_each_tuple_impl(F && fn, Tuple && t, std::index_sequence<S...>)
+{
+  auto l __attribute__((unused)) = {
+      (std::forward<F>(fn)(std::get<S>(std::forward<Tuple>(t))), 0)...};
+}
+
+template <typename F, typename Tuple>
+decltype(auto) for_each_tuple(Tuple && t, F && fn)
+{
+  constexpr size_t tSize =
+      std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
+  for_each_tuple_impl(std::forward<F>(fn), std::forward<Tuple>(t),
+                      std::make_index_sequence<tSize>());
 }
 }
 }
